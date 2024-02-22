@@ -10,7 +10,7 @@ from events.visual import BlinkingEvent, VisualEvent
 
 def load_events() -> list[Type[Event]]:
     events = []
-    for event in (ApproximationEvent, SkullMaskEvent, AccelerationEvent, ScreenScrollEvent, BlinkingEvent):
+    for event in (ApproximationEvent, SkullMaskEvent, ScreenScrollEvent, BlinkingEvent, AccelerationEvent):
         if issubclass(event, MaskEvent) and ENABLE_MASK_EVENTS:
             events.extend((event,) * MASK_EVENTS_FREQUENCY_MULTIPLIER)
         elif issubclass(event, MovementEvent) and ENABLE_MOVEMENT_EVENTS:

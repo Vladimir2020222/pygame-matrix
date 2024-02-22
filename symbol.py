@@ -41,6 +41,7 @@ class Symbol(pygame.sprite.Sprite):
     ):
         super().__init__()
         assert is_part_of_trail == (not not trail_head)
+        self._speed_randomization = None
         self.foreign_data: dict[str, Any] = {}
         self.is_part_of_trail = is_part_of_trail
         if is_part_of_trail:
@@ -53,7 +54,7 @@ class Symbol(pygame.sprite.Sprite):
         self.speed = speed
 
         self.__previous_rounded_size = round(size) - 10
-        self.size = size          # these two lines make size setter to load font
+        self.size = size          # this line make size setter to load font
 
         self.enable_symbol_randomization = enable_symbol_randomization
 
@@ -89,7 +90,12 @@ class Symbol(pygame.sprite.Sprite):
         if self._speed is None:
             self._speed = self.size * SYMBOLS_SPEED / 15 + SYMBOLS_SPEED_ADDITION
             if not self.is_part_of_trail:
-                self._speed += random.randint(0, SPEED_RANDOMIZATION)
+                speed_randomization = random.randint(0, SPEED_RANDOMIZATION)
+                self._speed += speed_randomization
+                self._speed_randomization = speed_randomization
+            else:
+                self._speed_randomization = self.trail_head._speed_randomization
+                self._speed += self._speed_randomization
         return self._speed
 
     @speed.setter

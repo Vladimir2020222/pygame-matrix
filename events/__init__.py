@@ -15,7 +15,7 @@ from masks import Mask, SkullMask
 
 class Event(SymbolChanger):
     duration: float
-    incompatible_events: Type['Event'] = []
+    incompatible_events: Collection['Event'] = []
 
     def __init__(self, symbols: Sequence[Symbol] | pygame.sprite.Group):
         self.symbols = symbols
@@ -36,13 +36,9 @@ class Event(SymbolChanger):
     def stop(self):
         self.is_active = False
 
-    @classmethod
-    def is_compatible_with(cls, other_events: Collection[Type['Event']]) -> bool:
-        for incompatible_event in cls.incompatible_events:
-            if incompatible_event in other_events:
-                return False
+    def is_compatible_with(self, other_events: Collection['Event']) -> bool:
         for another_event in other_events:
-            if another_event == cls:
+            if another_event.__class__ in self.incompatible_events or another_event.__class__ == self.__class__:
                 return False
         return True
 

@@ -1,9 +1,11 @@
 # region imports
+import pygame
+pygame.init()
 import random
 from typing import Sequence, Type
 
-import pygame
-pygame.init()
+
+from events.movement import AccelerationEvent, ScreenScrollEvent, ApproximationEvent
 
 from fps_printer import FpsCounter
 from setup import load_events
@@ -16,7 +18,9 @@ from symbol import Symbol
 
 # endregion
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+if __name__ == '__main__':
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 fps_counter = FpsCounter()
 
 symbols: Sequence[Symbol] | pygame.sprite.Group = pygame.sprite.Group()
@@ -70,22 +74,20 @@ def main():
         # endregion
 
         # region events
-
         if ENABLE_EVENTS:
             if random.random() < EVENTS_FREQUENCY:
                 for _ in range(5):
                     event_class: Type[Event] = random.choice(possible_events)
-                    events_classes = tuple(map(lambda a: a.__class__, events))
-                    new_event_is_compatible = event_class.is_compatible_with(events_classes)
+                    event = event_class(symbols)
+
+                    new_event_is_compatible = event.is_compatible_with(events)
                     other_events_is_compatible = all(
-                        e.is_compatible_with((*events_classes, event_class)) for e in events
+                        e.is_compatible_with((event, )) for e in events
                     )
                     if new_event_is_compatible and other_events_is_compatible:
-                        event = event_class(symbols)
-                        if event.__class__ not in map(lambda x: x.__class__, events):
-                            event.start()
-                            events.append(event)
-                        break
+                        event.start()
+                        events.append(event)
+                    break
 
             for event in events:
                 event.update()
@@ -108,4 +110,5 @@ def main():
         pygame.display.update()
 
 
-main()
+if __name__ == '__main__':
+    main()

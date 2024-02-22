@@ -56,6 +56,7 @@ class ScreenScrollEvent(MovementEvent, GetAccelerationCoefficientMixin):
     acceleration_time = 1.5
     speed = 1.35
     symbol_state_keys = ['speed']
+    incompatible_events = []
 
     def __init__(
             self,
@@ -119,11 +120,17 @@ class ScreenScrollEvent(MovementEvent, GetAccelerationCoefficientMixin):
                 self.restore_symbol_state(symbol)
             DENSITY[0] = self.density
 
+    def is_compatible_with(self, other_events: Collection['Event']) -> bool:
+        return super().is_compatible_with(other_events) and not (
+            AccelerationEvent in [x.__class__ for x in other_events] and self.stop_symbols
+        )
+
 
 class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
-    duration = 2
-    acceleration_time = 1
-    approximation_speed = 0.02
+    duration = 1.8
+    acceleration_time = 0.7
+    approximation_speed = 0.03
+    incompatible_events = [AccelerationEvent, ScreenScrollEvent]
 
     def __init__(self, *args, to: tuple[int, int] = None, **kwargs):
         if to is None:
@@ -148,6 +155,8 @@ class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
             rect = symbol.rect
             symbol.set_size(symbol._size * size_multiplier, reset_speed=False)
 
+            move_coefficient = coefficient * min(6, (symbol.size / 14) ** 1.5)
+
             # approximation #
             x_distance = self.to[0] - rect.x
             y_distance = self.to[1] - rect.y
@@ -157,7 +166,7 @@ class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
                 rect.x = symbol.trail_head.rect.x
             else:
                 cos = x_distance / distance
-                x_change = x_distance * cos * coefficient + 0.3  # it works awful without this stupid magic value
+                x_change = x_distance * cos * move_coefficient + 0.3  # it works awful without this stupid magic value
 
                 if rect.x > self.to[0]:
                     rect.x += x_change
@@ -167,8 +176,7 @@ class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
             # y value #
             sin = y_distance / distance
 
-            y_change = y_distance * sin * coefficient + 0.3  # same
-
+            y_change = y_distance * sin * move_coefficient + 0.3  # same
             if rect.y > self.to[1]:
                 rect.y += y_change
             else:
@@ -179,10 +187,3 @@ class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
         for symbol in self.symbols:
             symbol._speed = None
         DENSITY[0] = self.density
-
-    @classmethod
-    def is_compatible_with(cls, other_events: Collection[Type['Event']]) -> bool:
-        movement_events_exist = any(issubclass(e, MovementEvent) for e in other_events)
-        if movement_events_exist:
-            return False
-        return super().is_compatible_with(other_events)
