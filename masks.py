@@ -82,6 +82,7 @@ class SkullMask(Mask):
 
     def apply(self, symbol: Symbol) -> None:
         if super().apply(symbol):
+            symbol.update_color = False
             if self.change_symbols_scale:
                 symbol.set_size(symbol.size * self.change_symbols_scale_factor, reset_speed=False)
 
