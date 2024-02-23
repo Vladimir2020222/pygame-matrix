@@ -1,7 +1,5 @@
 from typing import TypedDict
 
-from masks import Mask
-
 
 class GlobalVariables(TypedDict):
     tick: int

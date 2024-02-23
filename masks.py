@@ -73,7 +73,7 @@ class Mask(pygame.sprite.Sprite, SymbolChanger):
 
 class SkullMask(Mask):
     change_color_every_tick = True
-    symbol_state_keys = ('color', 'is_blinking', 'enable_blinking', 'size')
+    symbol_state_keys = ('color', 'is_blinking', 'enable_blinking', 'size', 'update_color')
     change_symbols_scale_factor = 0.5
 
     def __init__(self, *, x, y, default_color=(255, 0, 0), scale=1, change_symbols_scale=True):

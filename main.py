@@ -11,7 +11,7 @@ from setup import load_events
 from events import Event
 from global_ import GLOBAL_VARIABLES
 from config import WIDTH, HEIGHT, FPS, DENSITY, AVAILABLE_SYMBOLS, DEBUG, get_random_symbol_size, ENABLE_EVENTS, \
-    EVENTS_FREQUENCY
+    EVENTS_FREQUENCY, get_new_symbol_x
 from symbol import Symbol
 
 
@@ -61,11 +61,12 @@ def main():
             symbol.draw(screen)
 
         for _ in range(DENSITY[0]):
+            size = get_random_symbol_size()
             new_symbol = Symbol(
                 random.choice(AVAILABLE_SYMBOLS),
-                x=random.randint(0, WIDTH),
+                x=get_new_symbol_x(size),
                 y=0,
-                size=get_random_symbol_size()
+                size=size
             )
 
             symbols.add(new_symbol)

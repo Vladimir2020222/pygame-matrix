@@ -7,7 +7,7 @@ from config import WIDTH, HEIGHT, USE_ANTIALIAS, SYMBOLS_SPEED, ENABLE_SYMBOLS_R
     AVAILABLE_SYMBOLS, ENABLE_BLINKING, SYMBOLS_RANDOMIZATION_SPEED, BLINKING_FREQUENCY, \
     BLINKING_0_OPACITY_PROBABILITY, SPEED_RANDOMIZATION, \
     BLINKING_SYMBOL_MAX_OPACITY, BLINKING_STOP_PROBABILITY, DEFAULT_COLOR, TRAILS_LENGTH, MIN_SYMBOL_OPACITY, \
-    FONT_NAME, SYMBOLS_SPEED_ADDITION
+    FONT_NAME, SYMBOLS_SPEED_ADDITION, get_color, DISTANCE_BETWEEN_SYMBOLS_IN_TAIL, UPDATE_SYMBOL_COLOR
 
 
 def load_font(s):
@@ -32,34 +32,36 @@ class Symbol(pygame.sprite.Sprite):
             y: int,
             opacity: float = 1,
             size: int = 10,
-            color: tuple[int, int, int] = DEFAULT_COLOR,
+            color: tuple[int, int, int] = None,
             enable_symbol_randomization: bool = ENABLE_SYMBOLS_RANDOMIZATION,
             enable_blinking: bool = ENABLE_BLINKING,
             speed: Optional[int] = None,
             is_part_of_trail: bool = False,
-            trail_head: 'Symbol' = None
+            trail_head: 'Symbol' = None,
+            update_color: bool = UPDATE_SYMBOL_COLOR
     ):
         super().__init__()
         assert is_part_of_trail == (not not trail_head)
+
+        self.opacity_before_blinking = opacity
+        self.enable_symbol_randomization = enable_symbol_randomization
+        self.update_color = update_color
+        self.speed = speed
         self._speed_randomization = None
-        self.foreign_data: dict[str, Any] = {}
         self.is_part_of_trail = is_part_of_trail
         if is_part_of_trail:
             self.trail_head = trail_head
         self.symbol = symbol
         self.opacity = opacity
-        self.color = color
-        self.enable_blinking = enable_blinking
+        self.color = color or get_color()
+        self.is_blinking = False
 
-        self.speed = speed
+        self.foreign_data: dict[str, Any] = {}
+        self.enable_blinking = enable_blinking
 
         self.__previous_rounded_size = round(size) - 10
         self.size = size          # this line make size setter to load font
 
-        self.enable_symbol_randomization = enable_symbol_randomization
-
-        self.is_blinking = False
-        self.opacity_before_blinking = opacity
         self.image = self.get_rendered_symbol()
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -131,6 +133,8 @@ class Symbol(pygame.sprite.Sprite):
                     self.opacity = 0
                 else:
                     self.opacity = round(random.random() * BLINKING_SYMBOL_MAX_OPACITY, 1)
+        if self.update_color:
+            self.color = get_color()
 
     def get_trail(self, attach=True) -> list['Symbol']:
         trail = []
@@ -151,7 +155,7 @@ class Symbol(pygame.sprite.Sprite):
         symbol = Symbol(
             self.symbol,
             x=self.rect.x,
-            y=self.rect.y - rendered_symbol.get_height(),
+            y=self.rect.y - (rendered_symbol.get_height() * DISTANCE_BETWEEN_SYMBOLS_IN_TAIL),
             opacity=self.opacity - self.decrease_opacity,
             size=self.size,
             color=self.color,
