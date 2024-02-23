@@ -8,14 +8,17 @@ class SymbolChanger:
 
     def restore_symbol_state(self, symbol, ignore_key_error=True, clear_state=True) -> None:
         for key in self.symbol_state_keys:
-            try:
-                foreign_key = self.get_key(key)
-                setattr(symbol, key, symbol.foreign_data[foreign_key])
-                if clear_state:
-                    del symbol.foreign_data[foreign_key]
-            except KeyError:
-                if not ignore_key_error:
-                    raise
+            self.restore_symbol_state_key(symbol, key, ignore_key_error, clear_state)
+
+    def restore_symbol_state_key(self, symbol, key: str, ignore_key_error=True, clear_state=True) -> None:
+        try:
+            foreign_key = self.get_key(key)
+            setattr(symbol, key, symbol.foreign_data[foreign_key])
+            if clear_state:
+                del symbol.foreign_data[foreign_key]
+        except KeyError:
+            if not ignore_key_error:
+                raise
 
     @property
     def prefix(self):

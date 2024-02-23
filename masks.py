@@ -1,3 +1,4 @@
+import random
 from typing import Sequence
 
 import pygame
@@ -11,6 +12,7 @@ class Mask(pygame.sprite.Sprite, SymbolChanger):
     image: pygame.Surface
     mask: pygame.Mask
     symbol_state_keys: Sequence[str]
+    change_color_every_tick = False
 
     def __init__(self, *, image=None, x: int, y: int = 0, scale=1, default_color=(0, 0, 0)):
         assert image
@@ -38,6 +40,8 @@ class Mask(pygame.sprite.Sprite, SymbolChanger):
 
     def apply(self, symbol: Symbol) -> bool:
         if symbol.foreign_data.get(self.get_key('applied')):
+            if self.change_color_every_tick:
+                symbol.color = self.get_color()
             return False
         self.save_symbol_state(symbol)
         symbol.foreign_data[self.get_key('applied')] = True
@@ -53,15 +57,33 @@ class Mask(pygame.sprite.Sprite, SymbolChanger):
         del symbol.foreign_data[self.get_key('applied')]
         return True
 
+    def restore_symbol_state_key(self, symbol, key: str, ignore_key_error=True, clear_state=True) -> None:
+        if key == 'size':
+            try:
+                foreign_key = self.get_key(key)
+                symbol.set_size(symbol.foreign_data[foreign_key], reset_speed=False)
+                if clear_state:
+                    del symbol.foreign_data[foreign_key]
+            except KeyError:
+                if not ignore_key_error:
+                    raise
+        else:
+            super().restore_symbol_state_key(symbol, key, ignore_key_error, clear_state)
+
 
 class SkullMask(Mask):
+    change_color_every_tick = True
     symbol_state_keys = ('color', 'is_blinking', 'enable_blinking', 'size')
+    change_symbols_scale_factor = 0.5
 
     def __init__(self, *, x, y, default_color=(255, 0, 0), scale=1, change_symbols_scale=True):
-        self.increase_symbols_scale = change_symbols_scale
+        self.change_symbols_scale = change_symbols_scale
         super().__init__(image='skull.png', x=x, y=y, default_color=default_color, scale=scale)
 
     def apply(self, symbol: Symbol) -> None:
         if super().apply(symbol):
-            if self.increase_symbols_scale:
-                symbol.size *= 0.2
+            if self.change_symbols_scale:
+                symbol.set_size(symbol.size * self.change_symbols_scale_factor, reset_speed=False)
+
+    def get_color(self) -> tuple[int, int, int]:
+        return random.randint(0, 255), 0, 0

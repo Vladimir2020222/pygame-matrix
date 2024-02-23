@@ -1,11 +1,10 @@
 # region imports
+from time import perf_counter
+
 import pygame
 pygame.init()
 import random
 from typing import Sequence, Type
-
-
-from events.movement import AccelerationEvent, ScreenScrollEvent, ApproximationEvent
 
 from fps_printer import FpsCounter
 from setup import load_events
@@ -31,6 +30,7 @@ possible_events: list[Type[Event]] = load_events()
 
 
 def main():
+    start = perf_counter()
     clock = pygame.time.Clock()
     while True:
         clock.tick(FPS)
@@ -74,7 +74,7 @@ def main():
         # endregion
 
         # region events
-        if ENABLE_EVENTS:
+        if ENABLE_EVENTS and perf_counter() - start > 2:
             if random.random() < EVENTS_FREQUENCY:
                 for _ in range(5):
                     event_class: Type[Event] = random.choice(possible_events)

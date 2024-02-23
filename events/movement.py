@@ -127,14 +127,14 @@ class ScreenScrollEvent(MovementEvent, GetAccelerationCoefficientMixin):
 
 
 class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
-    duration = 1.8
-    acceleration_time = 0.7
-    approximation_speed = 0.03
+    duration = 1.2
+    acceleration_time = 0.4
+    approximation_speed = 0.04
     incompatible_events = [AccelerationEvent, ScreenScrollEvent]
 
     def __init__(self, *args, to: tuple[int, int] = None, **kwargs):
         if to is None:
-            to = (WIDTH / 2, HEIGHT / 2)
+            to = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
         self.to = to
         self.density = DENSITY[0]
         super().__init__(*args, **kwargs)
