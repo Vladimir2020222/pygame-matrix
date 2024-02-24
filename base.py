@@ -1,6 +1,3 @@
-from line_profiler_pycharm import profile
-
-
 class SymbolChanger:
     symbol_state_keys: list[str] = []
 

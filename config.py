@@ -6,7 +6,7 @@ from global_ import GLOBAL_VARIABLES
 
 # you can use esc to enable full screen mode
 
-DEBUG = False
+DEBUG = True
 WIDTH, HEIGHT = pygame.display.get_desktop_sizes()[0]
 
 AVAILABLE_SYMBOLS = ('1', '0')
@@ -46,32 +46,26 @@ ENABLE_EVENTS = True
 EVENTS_START_DELAY = 2  # time from start to enabling events in seconds
 
 ENABLE_VISUAL_EVENTS = True
-VISUAL_EVENTS_FREQUENCY_MULTIPLIER = 3  # from 1 to infinity
+VISUAL_EVENTS_FREQUENCY_MULTIPLIER = 2  # from 1 to infinity
 
 ENABLE_MASK_EVENTS = True  # !!! MAY CAUSE LOTS OF LAGS !!!
 MASK_EVENTS_FREQUENCY_MULTIPLIER = 1  # from 1 to infinity
 
 ENABLE_MOVEMENT_EVENTS = True  # !!!!!! MAY CAUSE LAGS !!!!!
-MOVEMENT_EVENTS_FREQUENCY_MULTIPLIER = 2  # from 1 to infinity
+MOVEMENT_EVENTS_FREQUENCY_MULTIPLIER = 1  # from 1 to infinity
 
 SCREEN_SCROLL_STOP_SYMBOLS_PROBABILITY = 0.4
-EVENTS_FREQUENCY = 0.03  # from 0 to 1
+EVENTS_FREQUENCY = 0.0375  # from 0 to 1
+
+_sizes = []
+for x in range(7, 55):
+    _sizes.extend([x] * round(10000 / x))
 
 
 def get_random_symbol_size() -> float:
-    random_value = random.random()
-
-    if random_value < 0.5:
-        return random.randint(2, 8)
-    if random_value < 0.8:
-        return random.randint(8, 15)
-    if random_value < 0.92:
-        return random.randint(13, 25)
-    if random_value < 0.98:
-        return random.randint(20, 45)
-    if random_value < 0.992:
-        return random.randint(40, 70)
-    return random.randint(50, random.randint(70, random.randint(100, 500)))
+    if random.random() < 0.04:
+        return random.randint(55, 100)
+    return random.choice(_sizes)
 
 
 def get_new_symbol_x(symbol_size: float) -> float:

@@ -18,10 +18,10 @@ class MovementEvent(Event):
 class AccelerationEvent(MovementEvent, GetAccelerationCoefficientMixin):
     duration = 3
     acceleration_time = 1.5
-    speed = 5
     symbol_state_keys = ['speed']
 
-    def __init__(self, symbols):
+    def __init__(self, symbols, speed=None):
+        self.speed = speed or random.randint(20, 80) / 10
         self.density = DENSITY[0]
         super().__init__(symbols)
 
@@ -54,16 +54,20 @@ class AccelerationEvent(MovementEvent, GetAccelerationCoefficientMixin):
 class ScreenScrollEvent(MovementEvent, GetAccelerationCoefficientMixin):
     duration = 4
     acceleration_time = 1.5
-    speed = 1.35
     symbol_state_keys = ['speed']
     incompatible_events = []
 
     def __init__(
             self,
             symbols: Sequence[Symbol] | pygame.sprite.Group,
+            *,
+            speed=None,
             direction: DirectionEnum = None,
             stop_symbols: bool = None
     ):
+        if speed is None:
+            speed = random.randint(9, 22) / 10
+        self.speed = speed
         if stop_symbols is None:
             stop_symbols = random.random() < SCREEN_SCROLL_STOP_SYMBOLS_PROBABILITY
         self.stop_symbols = stop_symbols
@@ -153,9 +157,10 @@ class ApproximationEvent(MovementEvent, GetAccelerationCoefficientMixin):
         size_multiplier = 1 + coefficient
         for symbol in self.symbols:
             rect = symbol.rect
-            symbol.set_size(symbol._size * size_multiplier, reset_speed=False)
+            symbol_size = symbol._size
+            symbol.set_size(symbol_size * size_multiplier, reset_speed=False)
 
-            move_coefficient = coefficient * min(6, (symbol.size / 14) ** 1.5)
+            move_coefficient = coefficient * symbol_size / 30  # IDK why is it 30, but it works when it is around 30
 
             # approximation #
             x_distance = self.to[0] - rect.x
