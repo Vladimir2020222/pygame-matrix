@@ -28,4 +28,4 @@ class FpsCounter:
             self.second_start = now
 
     def print(self):
-        print(f'\rFPS: {self.fps:.2f}; AVG FPS: {self.avg_fps:.2f}; MIN FPS: {self.min_fps}', end='')
+        print(f'\rFPS: {self.fps:.2f}; AVG FPS: {self.avg_fps:.2f}; MIN FPS: {self.min_fps:.2f}', end='')

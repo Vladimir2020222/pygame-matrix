@@ -1,4 +1,3 @@
-import random
 from typing import Sequence
 
 import pygame
@@ -85,6 +84,3 @@ class SkullMask(Mask):
             symbol.update_color = False
             if self.change_symbols_scale:
                 symbol.set_size(symbol.size * self.change_symbols_scale_factor, reset_speed=False)
-
-    def get_color(self) -> tuple[int, int, int]:
-        return random.randint(0, 255), 0, 0

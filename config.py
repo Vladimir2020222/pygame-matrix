@@ -15,7 +15,6 @@ FONT_NAME = 'unifont-15.1.04.ttf'
 DEFAULT_COLOR = 0, 235, 0
 ENABLE_COLOR_CHANGING = False  # this setting is not necessary for project, it is needed for default implementation of
 #                               get_color function below
-
 UPDATE_SYMBOL_COLOR = False  # update symbol color every tick using function get_color
 USE_ANTIALIAS = False
 FPS = 30  # from 0 to infinity

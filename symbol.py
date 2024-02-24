@@ -6,7 +6,7 @@ import pygame
 from config import WIDTH, HEIGHT, USE_ANTIALIAS, SYMBOLS_SPEED, ENABLE_SYMBOLS_RANDOMIZATION, \
     AVAILABLE_SYMBOLS, ENABLE_BLINKING, SYMBOLS_RANDOMIZATION_SPEED, BLINKING_FREQUENCY, \
     BLINKING_0_OPACITY_PROBABILITY, SPEED_RANDOMIZATION, \
-    BLINKING_SYMBOL_MAX_OPACITY, BLINKING_STOP_PROBABILITY, DEFAULT_COLOR, TRAILS_LENGTH, MIN_SYMBOL_OPACITY, \
+    BLINKING_SYMBOL_MAX_OPACITY, BLINKING_STOP_PROBABILITY, TRAILS_LENGTH, MIN_SYMBOL_OPACITY, \
     FONT_NAME, SYMBOLS_SPEED_ADDITION, get_color, DISTANCE_BETWEEN_SYMBOLS_IN_TAIL, UPDATE_SYMBOL_COLOR
 
 
@@ -18,7 +18,7 @@ def load_font(s):
 
 
 class Symbol(pygame.sprite.Sprite):
-    image: pygame.Surface
+    image: pygame.Surface | None
     rect: pygame.Rect
     trail: Optional[list['Symbol']] = None
 
@@ -28,10 +28,10 @@ class Symbol(pygame.sprite.Sprite):
             self,
             symbol: str,
             *,
-            x: int,
-            y: int,
+            x: float,
+            y: float,
             opacity: float = 1,
-            size: int = 10,
+            size: float = 10,
             color: tuple[int, int, int] = None,
             enable_symbol_randomization: bool = ENABLE_SYMBOLS_RANDOMIZATION,
             enable_blinking: bool = ENABLE_BLINKING,
@@ -76,6 +76,7 @@ class Symbol(pygame.sprite.Sprite):
         rounded_value = round(value)
 
         if rounded_value != self.__previous_rounded_size:
+            self.image = None
             if reset_speed:
                 self._speed = None
             self.__previous_rounded_size = round(value)
@@ -105,7 +106,7 @@ class Symbol(pygame.sprite.Sprite):
         self._speed = value
 
     def draw(self, surface: pygame.Surface) -> None:
-        surface.blit(self.get_rendered_symbol(), (self.rect.x, self.rect.y))
+        surface.blit(self.image or self.get_rendered_symbol(), (self.rect.x, self.rect.y))
 
     def should_be_removed(self) -> bool:
         return ((not -1000 < self.rect.y < HEIGHT + 10)
@@ -166,9 +167,11 @@ class Symbol(pygame.sprite.Sprite):
         return symbol
 
     def get_rendered_symbol(self) -> pygame.Surface:
-        alpha: int = round(255 * self.opacity, -1)
-        cached = symbols_cache.get((self.symbol, self.size, self.color, alpha))
-        if cached:
+        if (
+                cached := symbols_cache.get(
+                    (self.symbol, self.size, self.color, alpha := round(255 * self.opacity, -1))
+                )
+        ) is not None:
             self.image = cached
             return cached
 
@@ -181,6 +184,36 @@ class Symbol(pygame.sprite.Sprite):
         symbols_cache[(self.symbol, self.size, self.color, alpha)] = rendered_symbol
         self.image = rendered_symbol
         return rendered_symbol
+
+    # yes, code below is horrible (the whole project is), but it is for performance. I could use __setattr__
+    # but it will slow code down a lot
+
+    @property
+    def symbol(self):
+        return self._symbol
+
+    @symbol.setter
+    def symbol(self, value):
+        self._symbol = value
+        self.image = None
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        self._color = value
+        self.image = None
+
+    @property
+    def opacity(self):
+        return self._opacity
+
+    @opacity.setter
+    def opacity(self, value):
+        self._opacity = value
+        self.image = None
 
     def __repr__(self):
         r = (f'Symbol(\n'

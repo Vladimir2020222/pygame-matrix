@@ -1,8 +1,9 @@
 # region imports
-from time import perf_counter
-
 import pygame
 pygame.init()
+
+from time import perf_counter
+
 import random
 from typing import Sequence, Type
 
@@ -35,6 +36,7 @@ def main():
     while True:
         clock.tick(FPS)
         GLOBAL_VARIABLES['tick'] += 1
+        global_tick = GLOBAL_VARIABLES['tick']
         if DEBUG:
             fps_counter.update()
             fps_counter.print()
@@ -52,7 +54,7 @@ def main():
         # region updating and creating symbols
 
         for symbol in symbols:
-            if GLOBAL_VARIABLES['tick'] % 5 == 0 and symbol.should_be_removed():
+            if global_tick % 5 == 0 and symbol.should_be_removed():
                 symbols.remove(symbol)
                 if not symbol.is_part_of_trail:
                     for trail_symbol in symbol.trail:
